@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Menu Digital - Commander</title>
+    <style>
+        :root { --primary: #075E54; --whatsapp: #25D366; --danger: #e74c3c; }
+        body { font-family: 'Segoe UI', sans-serif; margin: 0; background: #f4f7f6; padding-bottom: 120px; }
+        header { background: var(--primary); color: white; padding: 20px; text-align: center; }
+        .container { padding: 15px; }
+        .item { background: white; border-radius: 12px; padding: 15px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        .item b { display: block; font-size: 1.1em; }
+        .price { color: var(--primary); font-weight: bold; }
+        .add-btn { background: var(--whatsapp); color: white; border: none; padding: 8px 15px; border-radius: 8px; font-weight: bold; cursor: pointer; }
+        
+        #cart-panel { background: white; border-radius: 15px 15px 0 0; padding: 20px; position: fixed; bottom: 0; width: 100%; box-sizing: border-box; box-shadow: 0 -5px 20px rgba(0,0,0,0.1); display: none; }
+        .cart-item { display: flex; justify-content: space-between; margin-bottom: 10px; font-size: 14px; }
+        .btn-send { background: var(--primary); color: white; width: 100%; border: none; padding: 15px; border-radius: 30px; font-size: 18px; font-weight: bold; cursor: pointer; }
+        .remove-btn { color: var(--danger); border: none; background: none; font-size: 12px; cursor: pointer; }
+    </style>
+</head>
+<body>
+
+<header>
+    <h2 id="snack-name">SNACK EL BARAKA</h2>
+    <p id="table-display">Table : Non spécifiée</p>
+</header>
+
+<div class="container" id="menu-list">
+    <div class="item">
+        <div><b>🌮 Tacos Mixte</b><span class="price">45 DH</span></div>
+        <button class="add-btn" onclick="addToCart('Tacos Mixte', 45)">Ajouter</button>
+    </div>
+    <div class="item">
+        <div><b>🍔 Burger Royal</b><span class="price">35 DH</span></div>
+        <button class="add-btn" onclick="addToCart('Burger Royal', 35)">Ajouter</button>
+    </div>
+    <div class="item">
+        <div><b>🍟 Grandes Frites</b><span class="price">15 DH</span></div>
+        <button class="add-btn" onclick="addToCart('Grandes Frites', 15)">Ajouter</button>
+    </div>
+</div>
+
+<div id="cart-panel">
+    <div id="items-list"></div>
+    <hr>
+    <div style="display:flex; justify-content:space-between; font-weight:bold; font-size:20px; margin-bottom:15px;">
+        <span>Total :</span><span id="total-val">0</span> DH
+    </div>
+    <button class="btn-send" onclick="sendOrder()">✅ ENVOYER LA COMMANDE</button>
+</div>
+
+<script>
+    let cart = [];
+    // Récupérer le numéro de table depuis l'URL (?table=5)
+    let urlParams = new URLSearchParams(window.location.search);
+    let table = urlParams.get('table') || "Non spécifiée";
+    document.getElementById('table-display').innerText = "Table : " + table;
+
+    function addToCart(name, price) {
+        cart.push({name, price});
+        updateUI();
+    }
+
+    function remove(index) {
+        cart.splice(index, 1);
+        updateUI();
+    }
+
+    function updateUI() {
+        const panel = document.getElementById('cart-panel');
+        const list = document.getElementById('items-list');
+        if(cart.length > 0) {
+            panel.style.display = 'block';
+            let total = 0;
+            list.innerHTML = '';
+            cart.forEach((item, index) => {
+                total += item.price;
+                list.innerHTML += `<div class="cart-item"><span>${item.name}</span> <span>${item.price} DH <button class="remove-btn" onclick="remove(${index})">✖</button></span></div>`;
+            });
+            document.getElementById('total-val').innerText = total;
+        } else {
+            panel.style.display = 'none';
+        }
+    }
+
+    function sendOrder() {
+        let snackPhone = "2126XXXXXXXX"; // REMPLACER PAR LE NUMERO DU SNACK
+        let total = document.getElementById('total-val').innerText;
+        let msg = `*🆕 COMMANDE TABLE ${table}*\n\n`;
+        
+        let counts = {};
+        cart.forEach(x => { counts[x.name] = (counts[x.name] || 0) + 1; });
+        for (let item in counts) { msg += `✅ ${counts[item]}x *${item}*\n`; }
+        
+        msg += `\n💰 *Total à payer : ${total} DH*`;
+        window.open(`https://wa.me/${snackPhone}?text=${encodeURIComponent(msg)}`, '_blank');
+    }
+</script>
+
+</body>
+</html>
